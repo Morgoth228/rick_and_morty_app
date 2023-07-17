@@ -1,17 +1,23 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:rick_and_morty/data/service/location_client.dart';
 import 'package:rick_and_morty/model/location.dart';
 import 'package:rick_and_morty/util/pagination_builder.dart';
-
-class LocationsPage extends StatelessWidget {
+import 'package:provider/provider.dart';
+@RoutePage()
+class LocationsPage extends StatefulWidget {
   const LocationsPage({
     super.key,
-    required this.locationClient,
   });
 
-  final LocationClient locationClient;
+  @override
+  State<LocationsPage> createState() => _LocationsPageState();
+}
+
+class _LocationsPageState extends State<LocationsPage> {
+  LocationClient get locationClient => context.read();
 
   Future<(List<Location>, bool)> _loadLocations(int page) async {
     try {

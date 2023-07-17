@@ -1,30 +1,38 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:rick_and_morty/data/service/character_client.dart';
 import 'package:rick_and_morty/data/service/episode_client.dart';
 import 'package:rick_and_morty/model/character.dart';
 import 'package:rick_and_morty/model/episode.dart';
+import 'package:rick_and_morty/navigator/app_router.dart';
 import 'package:rick_and_morty/pages/episodes_page/episodes_page.dart';
 import 'package:rick_and_morty/util/path_id.dart';
-
-class CharacterPage extends StatelessWidget {
+@RoutePage()
+class CharacterPage extends StatefulWidget {
   const CharacterPage({
     super.key,
     this.preview,
     required this.id,
-    required this.characterClient,
-    required this.episodeClient,
   });
 
-  final CharacterClient characterClient;
-  final EpisodeClient episodeClient;
   final Character? preview;
   final int id;
 
+  @override
+  State<CharacterPage> createState() => _CharacterPageState();
+}
+
+class _CharacterPageState extends State<CharacterPage> {
+  CharacterClient get characterClient => context.read();
+
+  EpisodeClient get episodeClient => context.read();
+
   Future<Character> _loadCharacter() async {
     try {
-      final character = await characterClient.getCharacter(id);
+      final character = await characterClient.getCharacter(widget.id);
       return character;
     } catch (e) {
       debugPrint(e.toString());
@@ -52,7 +60,7 @@ class CharacterPage extends StatelessWidget {
 
     return Scaffold(
       body: FutureBuilder(
-        initialData: preview,
+        initialData: widget.preview,
         future: _loadCharacter(),
         builder: (context, snapshot) {
           final character = snapshot.data;
@@ -140,6 +148,7 @@ class CharacterPage extends StatelessWidget {
                         subtitle: Text(character.origin.name),
                         trailing: const Icon(Icons.navigate_next),
                         onTap: () {
+                          context.router.root.push(LocationRoute(id: int.parse(character.origin.url.id)));
                           // TODO(netos23): implement
                         },
                       ),
@@ -158,6 +167,7 @@ class CharacterPage extends StatelessWidget {
                         subtitle: Text(character.origin.name),
                         trailing: const Icon(Icons.navigate_next),
                         onTap: () {
+                          context.router.root.push(LocationRoute(id: int.parse(character.location.url.id)));
                           // TODO(netos23): implement
                         },
                       ),

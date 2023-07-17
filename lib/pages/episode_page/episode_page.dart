@@ -1,26 +1,34 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:rick_and_morty/data/service/character_client.dart';
 import 'package:rick_and_morty/data/service/episode_client.dart';
 import 'package:rick_and_morty/model/character.dart';
 import 'package:rick_and_morty/model/episode.dart';
+import 'package:rick_and_morty/navigator/app_router.dart';
 import 'package:rick_and_morty/pages/characters_page/widgets/character_card.dart';
 import 'package:rick_and_morty/util/path_id.dart';
 
-class EpisodePage extends StatelessWidget {
+@RoutePage()
+class EpisodePage extends StatefulWidget {
   const EpisodePage({
     super.key,
-    required this.episodeClient,
-    required this.characterClient,
     this.preview,
     required this.id,
   });
 
-  final EpisodeClient episodeClient;
-  final CharacterClient characterClient;
-
   final Episode? preview;
   final int id;
+
+  @override
+  State<EpisodePage> createState() => _EpisodePageState();
+}
+
+class _EpisodePageState extends State<EpisodePage> {
+  EpisodeClient get episodeClient => context.read();
+
+  CharacterClient get characterClient => context.read();
 
   Future<List<Character>> _loadCharacter(List<String> characters) async {
     final ids = characters.map((ch) => ch.id).join(',');
@@ -49,8 +57,8 @@ class EpisodePage extends StatelessWidget {
 
     return Scaffold(
       body: FutureBuilder(
-        initialData: preview,
-        future: _loadEpisode(id),
+        initialData: widget.preview,
+        future: _loadEpisode(widget.id),
         builder: (context, snapshot) {
           final episode = snapshot.data;
           if (episode == null) {
@@ -129,8 +137,13 @@ class EpisodePage extends StatelessWidget {
                         sliver: SliverList.separated(
                           itemBuilder: (context, index) {
                             final character = characters[index];
-                            return CharacterCard(
-                              character: character,
+                            return GestureDetector(
+                              onTap: (){
+                                context.router.root.push(CharacterRoute(id: character.id, preview: character));
+                              },
+                              child: CharacterCard(
+                                character: character,
+                              ),
                             );
                           },
                           separatorBuilder: (_, __) => const SizedBox(
